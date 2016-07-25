@@ -22,8 +22,9 @@ public class HartiganTest {
 
     @Test
     public void testHartigan() throws IOException {
-        int score = Hartigan.bottomUp(root, worldSet);
-        Hartigan.topDown(root);
+        int chars = root.root.size();
+        int score = Hartigan.bottomUp(root, worldSet, chars);
+        Hartigan.topDown(root, chars);
         assertEquals("Hartigan score", 25, score);
     }
 

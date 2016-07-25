@@ -28,6 +28,9 @@ public abstract class TreeEnumerator<S> {
     //The root of the current tree
     protected Node<S> root = new Node<>("");
 
+    //the number of characters a species has (Node.chars, passed in to avoid overhead)
+    protected int chars = 0;
+
     //Add internal between current and parent, and then make leaf a child of internal
     protected void addNodeToEdge(Node<S> current, Node<S> parent, Node<S> internal, Node<S> leaf) {
         Node.unlinkNodes(parent, current);

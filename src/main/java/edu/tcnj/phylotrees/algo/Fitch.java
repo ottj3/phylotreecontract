@@ -11,7 +11,7 @@ import java.util.Set;
 public class Fitch {
 
     // internal method to calculate score from a node's children to itself
-    private static <S> int fitch(Node<S> current) {
+    private static <S> int fitch(Node<S> current, int chars) {
         // if we are a leaf node, our current root set is already
         // correct, and the score is 0
         if (current.children.isEmpty()) return 0;
@@ -24,10 +24,10 @@ public class Fitch {
         }
 
         // initialize our new root set as a bunch of empty sets
-        CharacterList<S> root = Node.sets();
+        CharacterList<S> root = Node.sets(chars);
 
         // for each character
-        for (int i = 0; i < Node.chars; i++) {
+        for (int i = 0; i < chars; i++) {
             boolean first = true;
             boolean union = false;
             // get the root set for that character
@@ -71,21 +71,23 @@ public class Fitch {
      * sum of the number of character state mutations between each node and its children
      *
      * @param root the (sub)tree root node to score using Fitch's parsimony algorithm
+     * @param chars the number of characters a species has (Node.chars, passed in to avoid overhead)
      * @return the parsimony score of the tree
      */
-    public static <S> int bottomUp(Node<S> root) {
+    public static <S> int bottomUp(Node<S> root, int chars) {
         int score = 0;
 
         // recursive down the to bottom of the tree first
         for (Node<S> child : root.children) {
-            score += bottomUp(child);
+            score += bottomUp(child, chars);
         }
 
         if (root.children.size() > 2) {
-            throw new IllegalArgumentException("Can only perform Fitch on cubic tree - got node of degree > 3: " + (new Parser()).toString(root, false));
+            throw new IllegalArgumentException("Can only perform Fitch on cubic tree - got node of degree > 3: "
+                    + (new Parser()).toString(root, false));
         }
 
-        score += fitch(root);
+        score += fitch(root, chars);
 
         return score;
     }

@@ -15,20 +15,20 @@ public class Hartigan {
 
     //Performs the calculation of upper and lower sets as well as MP-score.
     // Used in bottom-up of Hartigan's algorithm.
-    public static <S> int hartigan(Node<S> current, CharacterList<S> worldSet) {
+    public static <S> int hartigan(Node<S> current, CharacterList<S> worldSet, int chars) {
         int score = 0; //initialize maximum parsimony score of node
 
-        current.upper = Node.sets();
-        current.lower = Node.sets();//create upper and lower sets for each char of node
+        current.upper = Node.sets(chars);
+        current.lower = Node.sets(chars);//create upper and lower sets for each char of node
 
         //array to store count of each char as it appears in current's children
-        List<WordCountMap<S>> count = new ArrayList<>(Node.chars);
+        List<WordCountMap<S>> count = new ArrayList<>(chars);
 
         //Store the maximum count of states for each char
-        int[] kOccurrences = new int[Node.chars];
+        int[] kOccurrences = new int[chars];
 
         //Initialize empty hashmap for each character in alignment
-        for (int index = 0; index < Node.chars; index++) {
+        for (int index = 0; index < chars; index++) {
             WordCountMap<S> map = WordCountMap.withExpectedSize(4);
             for (S s : worldSet.get(index)) {
                 map.addValue(s, 0);
@@ -40,7 +40,7 @@ public class Hartigan {
         //for each child
         for (Node<S> child : current.children) {
             //for each character in species alignment
-            for (int index = 0; index < Node.chars; index++) {
+            for (int index = 0; index < chars; index++) {
                 //for each character state in the child's upper set
                 for (S state : child.upper.get(index)) {
                     //if alignment position contains the state, increase the count
@@ -55,7 +55,7 @@ public class Hartigan {
         }
 
         //Find all states that occur K or K-1 times, add to VU or VL respectively
-        for (int index = 0; index < Node.chars; index++) {
+        for (int index = 0; index < chars; index++) {
             for (S state : count.get(index).keySet()) {
                 int occurrences = count.get(index).getInt(state);
                 if (occurrences == kOccurrences[index]) {
@@ -72,13 +72,13 @@ public class Hartigan {
     }
 
     //Special case of hartigan's: initialize upper and lower sets of labelled nodes
-    private static <S> int fastHartigan(Node<S> current) {
+    private static <S> int fastHartigan(Node<S> current, int chars) {
         int score = 0; //initialize maximum parsimony score of node
-        current.upper = Node.sets();
-        current.lower = Node.sets(); //create upper and lower sets for each char of node
+        current.upper = Node.sets(chars);
+        current.lower = Node.sets(chars); //create upper and lower sets for each char of node
 
         //for each character in alignment
-        for (int index = 0; index < Node.chars; index++) {
+        for (int index = 0; index < chars; index++) {
             //Make the node's upper set equal its root set (assumes root set only contains one character)
             S label = current.root.get(index).iterator().next();
             current.upper.get(index).add(label);
@@ -100,28 +100,29 @@ public class Hartigan {
      *
      * @param current  the current node being used in the recursive call
      * @param worldSet this contains all possible character states
+     * @param chars the number of characters a species has (Node.chars, passed in to avoid overhead)
      * @return the parsimony score of this subtree
      */
-    public static <S> int bottomUp(Node<S> current, CharacterList<S> worldSet) {
+    public static <S> int bottomUp(Node<S> current, CharacterList<S> worldSet, int chars) {
         int score = 0;
 
         //Calculate the score of this node's children (bottom-up recursion)
         for (Node<S> child : current.children) {
-            score += bottomUp(child, worldSet);
+            score += bottomUp(child, worldSet, chars);
         }
 
         //If a node is not a leaf, use hartigan's to calculate its score and upper/lower set
         if (current.children.size() >= 1) {
             //Special case: if the node is labelled, calculate the score using fastHartigan
             if (current.labelled) {
-                score += fastHartigan(current);
+                score += fastHartigan(current, chars);
             } else {
-                score += hartigan(current, worldSet);
+                score += hartigan(current, worldSet, chars);
             }
         } else {
             //Assumes a leaf is labelled, so sets its upper set to be its root set and make an empty lower set
             current.upper = current.root;
-            current.lower = Node.sets();
+            current.lower = Node.sets(chars);
         }
 
         return score;
@@ -131,9 +132,10 @@ public class Hartigan {
      * Performs top-down of Hartigan's algorithm. (See Theorem3 of Hartigan's paper.)
      *
      * @param current the current node being used in the recursive call
+     * @param chars the number of characters a species has (Node.chars, passed in to avoid overhead)
      * @return a list of all zero-cost edges
      */
-    public static <S> List<List<Node<S>>> topDown(Node<S> current) {
+    public static <S> List<List<Node<S>>> topDown(Node<S> current, int chars) {
         //List of edges (inner list will always be a pair of nodes, to represent an edge)
         List<List<Node<S>>> edges = new ArrayList<>();
         if (current.parent == null) {
@@ -145,10 +147,10 @@ public class Hartigan {
                 int cost = 0;
 
                 // initialize blank root set for child
-                child.root = Node.sets();
+                child.root = Node.sets(chars);
 
                 //for each character in sequence
-                for (int i = 0; i < Node.chars; i++) {
+                for (int i = 0; i < chars; i++) {
                     //If current's root set is a subset of child's upper set
                     if (child.upper.get(i).containsAll(current.root.get(i))) {
                         //Child's root set = parent's root set for this character
@@ -195,7 +197,7 @@ public class Hartigan {
                 }
 
                 //recursively perform top down algorithm to get all root sets and 0-min-cost edges
-                edges.addAll(topDown(child));
+                edges.addAll(topDown(child, chars));
             }
         }
 

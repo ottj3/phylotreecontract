@@ -8,13 +8,11 @@ import java.util.Set;
 
 public class MixedTreeEnumerator<S> extends TreeEnumerator<S> {
 
-    public MixedTreeEnumerator(List<Node<S>> labelledNodes) {
-        this.labelledNodes = labelledNodes;
-    }
 
-    public MixedTreeEnumerator(List<Node<S>> labelledNodes, CharacterList<S> worldSet) {
+    public MixedTreeEnumerator(List<Node<S>> labelledNodes, CharacterList<S> worldSet, int chars) {
         this.labelledNodes = labelledNodes;
         this.worldSet = worldSet;
+        this.chars = chars;
     }
 
     /**
@@ -86,9 +84,9 @@ public class MixedTreeEnumerator<S> extends TreeEnumerator<S> {
     protected void hartiganEnumerateRecursive(Node<S> current, int size) {
         //Same as enumerateRecursive, but bounded using hartigan to score the trees in-progress
         if (size == labelledNodes.size()) {
-            int score = Hartigan.bottomUp(root, worldSet);
+            int score = Hartigan.bottomUp(root, worldSet, chars);
             updateMPlist(score);
-        } else if (Hartigan.bottomUp(root, worldSet) <= parsimonyScore || parsimonyScore == -1) {
+        } else if (Hartigan.bottomUp(root, worldSet, chars) <= parsimonyScore || parsimonyScore == -1) {
             case1(current, size, true);
             case2(current, size, true);
             case3(current, size, true);
@@ -194,7 +192,7 @@ public class MixedTreeEnumerator<S> extends TreeEnumerator<S> {
                 enumerateRecursive(root, size + 1);
             }
 
-            current.root = Node.sets();
+            current.root = Node.sets(chars);
             current.labelled = false;
             current.label = "";
         }

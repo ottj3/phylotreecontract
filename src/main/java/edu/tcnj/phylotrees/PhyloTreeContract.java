@@ -48,15 +48,16 @@ public class PhyloTreeContract {
     }
 
     private void runCubic(List<Node<Character>> species, CharacterList<Character> worldSet) {
+        int chars = species.iterator().next().root.size();
         long before = System.currentTimeMillis();
-        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species);
+        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species, chars);
         Set<Node<Character>> mostParsimonious = treeEnumerator.fitchEnumerate();
         List<Node<Character>> mostCompact = new ArrayList<>();
         int numContractions = 0;
         int mostCompactSize = Integer.MAX_VALUE;
         int initialSize = mostParsimonious.iterator().next().size();
         for (Node<Character> tree : mostParsimonious) {
-            EdgeContractor<Character> edgeContractor = new EdgeContractor<>(worldSet);
+            EdgeContractor<Character> edgeContractor = new EdgeContractor<>(worldSet, chars);
             for (Node<Character> compactTree : edgeContractor.edgeContraction(tree)) {
                 int thisSize = compactTree.size();
                 if (thisSize <= mostCompactSize) {

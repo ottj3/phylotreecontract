@@ -9,12 +9,13 @@ import java.util.Set;
 
 public class CubicTreeEnumerator<S> extends TreeEnumerator<S> {
 
-    public CubicTreeEnumerator(List<Node<S>> labelledNodes) {
+    public CubicTreeEnumerator(List<Node<S>> labelledNodes, int chars) {
         this.labelledNodes = labelledNodes;
+        this.chars = chars;
     }
 
-    public CubicTreeEnumerator(List<Node<S>> labelledNodes, CharacterList<S> worldSet) {
-        this.labelledNodes = labelledNodes;
+    public CubicTreeEnumerator(List<Node<S>> labelledNodes, CharacterList<S> worldSet, int chars) {
+        this(labelledNodes, chars);
         this.worldSet = worldSet;
     }
 
@@ -114,7 +115,7 @@ public class CubicTreeEnumerator<S> extends TreeEnumerator<S> {
         if (size == labelledNodes.size()) {
             //Root the tree to make it bifurcating (to work in Fitch) and score it
             root = Fitch.cubicToBinary(root);
-            int score = Fitch.bottomUp(root);
+            int score = Fitch.bottomUp(root, chars);
             //Add it to the list of most parsimonious trees if its score is the best
             updateMPlist(score);
 
@@ -128,7 +129,7 @@ public class CubicTreeEnumerator<S> extends TreeEnumerator<S> {
 
             //Root the tree, get its current parsimony score, and unroot it
             root = Fitch.cubicToBinary(root);
-            int thisScore = Fitch.bottomUp(root);
+            int thisScore = Fitch.bottomUp(root, chars);
             root = Fitch.binaryToCubic(root);
 
             //Same as enumerateRecursive but bounded: only continue if there is no best parsimony
@@ -157,6 +158,8 @@ public class CubicTreeEnumerator<S> extends TreeEnumerator<S> {
         trees = new HashSet<>();
         parsimonyScore = -1;
 
+        if (worldSet.isEmpty() || worldSet == null) return trees;
+
         initializeTree();
         if (labelledNodes.size() < 4) {
             trees.add(root.clone());
@@ -171,7 +174,7 @@ public class CubicTreeEnumerator<S> extends TreeEnumerator<S> {
         if (size == labelledNodes.size()) {
             //If the tree contains all labelled nodes, score it with hartigans
             //and update the list of most parsimonious trees.
-            int score = Hartigan.bottomUp(root, worldSet);
+            int score = Hartigan.bottomUp(root, worldSet, chars);
             updateMPlist(score);
         } else {
             for (int i = 0; i < current.children.size(); i++) {
@@ -179,7 +182,7 @@ public class CubicTreeEnumerator<S> extends TreeEnumerator<S> {
             }
             //Same as enumerateRecursive, but use Hartigan to score the tree and stop when the tree
             //cannot be a most parsimonious tree. Same as Fitch, but no need to root the tree first
-            if (current != root && (Hartigan.bottomUp(root, worldSet) <= parsimonyScore || parsimonyScore == -1)) {
+            if (current != root && (Hartigan.bottomUp(root, worldSet, chars) <= parsimonyScore || parsimonyScore == -1)) {
                 Node<S> internal = new Node<>("");
                 Node<S> leaf = labelledNodes.get(size).clone();
                 Node<S> parent = current.parent;

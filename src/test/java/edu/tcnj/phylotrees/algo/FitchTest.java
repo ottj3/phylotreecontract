@@ -10,6 +10,7 @@ public class FitchTest {
 
     private int handScored;
     private Node<Integer> testTree;
+    private int chars = 0;
 
     @Before
     public void setup() {
@@ -18,7 +19,7 @@ public class FitchTest {
 
     @Test
     public void testFitchScoring() {
-        int score = Fitch.bottomUp(testTree);
+        int score = Fitch.bottomUp(testTree, chars);
         assertEquals("Fitch score for test tree", handScored, score);
     }
 
@@ -33,14 +34,14 @@ public class FitchTest {
         left.parent = root;
         right.parent = root;
 
-        Node.chars = 10;
-        left.root = Node.sets();
-        right.root = Node.sets();
-        for (int i = 0; i < Node.chars / 2; i++) {
+        chars = 10;
+        left.root = Node.sets(chars);
+        right.root = Node.sets(chars);
+        for (int i = 0; i < chars / 2; i++) {
             left.root.get(i).add(1);
             right.root.get(i).add(2);
         }
-        for (int i = Node.chars / 2; i < Node.chars; i++) {
+        for (int i = chars / 2; i < chars; i++) {
             left.root.get(i).add(1);
             right.root.get(i).add(2);
         }

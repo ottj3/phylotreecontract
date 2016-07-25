@@ -18,14 +18,6 @@ import java.util.Set;
 public class Node<S> implements Cloneable {
 
     /**
-     * The number of characters in each species. This should always be kept the same
-     * when operating on a single set of input data. All the algorithms assume that
-     * all input species have the same number of Characters, and bad things will
-     * happen if they do not.
-     */
-    public static int chars;
-
-    /**
      * A "name" string for the node, used purely for humans to identify nodes.
      */
     public String label;
@@ -79,7 +71,7 @@ public class Node<S> implements Cloneable {
      * Construct a node with the given name and cost.
      *
      * @param label a name for the node, or an empty string for an unlabelled node
-     * @param cost the cost of the node, generally representing the weight of the edge to its parent
+     * @param cost  the cost of the node, generally representing the weight of the edge to its parent
      */
     public Node(String label, int cost) {
         this(label);
@@ -88,14 +80,12 @@ public class Node<S> implements Cloneable {
 
     /**
      * Utility method to generate a list of sets, one set for each Character in a species.
-     * <p>Callers should be responsible for ensuring that {@link #chars} is set before
-     * calling this method.</p>
      *
      * @return an empty but initialized {@link CharacterList} for a node with sets for each character
      */
-    public static <S> CharacterList<S> sets() {
+    public static <S> CharacterList<S> sets(int chars) {
         List<Set<S>> sets = new ArrayList<>(chars);
-        for (int i = chars; i-- > 0;) {
+        for (int i = chars; i-- > 0; ) {
             sets.add(new HashSet<S>());
         }
         return new CharacterList<>(sets);
@@ -105,7 +95,7 @@ public class Node<S> implements Cloneable {
      * Creates a parent-child relationship between two nodes in both directions.
      *
      * @param parent the node to be the parent
-     * @param child the node to be the child
+     * @param child  the node to be the child
      */
     public static <S> void linkNodes(Node<S> parent, Node<S> child) {
         parent.children.add(child);
@@ -116,7 +106,7 @@ public class Node<S> implements Cloneable {
      * Removes a parent-child relationship between two nodes in both directions.
      *
      * @param parent the original parent node
-     * @param child the child node
+     * @param child  the child node
      */
     public static <S> void unlinkNodes(Node<S> parent, Node<S> child) {
         parent.children.remove(child);

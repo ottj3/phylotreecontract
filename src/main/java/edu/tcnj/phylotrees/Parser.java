@@ -321,15 +321,15 @@ public class Parser {
         removeAllUninformative(data);
         for (int i = 0; i < input.size(); i++) {
             Node<S> node = new Node<>(labels.get(i));
-            Node.chars = data.get(i).length();
-            node.root = Node.sets();
+            int chars = data.get(i).length();
+            node.root = Node.sets(chars);
 
-            char[] chars = data.get(i).toCharArray();
-            for (int j = 0; j < chars.length; j++) {
+            char[] charArray = data.get(i).toCharArray();
+            for (int j = 0; j < charArray.length; j++) {
                 if (worldSet.size() <= j) {
                     worldSet.add(new HashSet<S>());
                 }
-                S state = (S) Character.valueOf(chars[j]);
+                S state = (S) Character.valueOf(charArray[j]);
                 worldSet.get(j).add(state);
                 node.root.get(j).add(state);
             }

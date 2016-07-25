@@ -33,7 +33,7 @@ public class CubicTreeEnumeratorTest extends TreeEnumeratorTest {
         for (int i = 1; i <= treeSize; i++) {
             treeNodes.add(new Node<Integer>(((Integer) i).toString()));
         }
-        treeEnumerator = new CubicTreeEnumerator<>(new ArrayList<>(treeNodes));
+        treeEnumerator = new CubicTreeEnumerator<>(new ArrayList<>(treeNodes), treeNodes.iterator().next().root.size());
         int expectedScore = 1;
         for (int j = 2 * treeSize - 5; j > 0; j -= 2) {
             expectedScore *= j;
@@ -51,12 +51,13 @@ public class CubicTreeEnumeratorTest extends TreeEnumeratorTest {
         long start = System.currentTimeMillis();
         getData(treeSize);
         Parser parser = new Parser();
-        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species);
+        int chars = species.iterator().next().root.size();
+        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species, chars);
         Set<Node<Character>> treeList = treeEnumerator.fitchEnumerate();
 //        System.out.println("Fitch enumerate: ");
         for (Node<Character> tree : treeList) {
-            System.out.println(parser.toString(tree, false) + " Score: " + Fitch.bottomUp(tree));
-            EdgeContractor<Character> edgeContractor = new EdgeContractor<>(worldSet);
+            System.out.println(parser.toString(tree, false) + " Score: " + Fitch.bottomUp(tree, chars));
+            EdgeContractor<Character> edgeContractor = new EdgeContractor<>(worldSet, chars);
             System.out.println("Old size: " + tree.size() + ", new size: " + edgeContractor.edgeContraction(tree).size());
         }
         System.out.println("Took " + (System.currentTimeMillis() - start) + "ms for trees of size " + treeSize + ".");
@@ -65,12 +66,13 @@ public class CubicTreeEnumeratorTest extends TreeEnumeratorTest {
     @Test
     public void testHartigan() {
         getData(treeSize);
-        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species, worldSet);
+        int chars = species.iterator().next().root.size();
+        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species, worldSet, chars);
         Set<Node<Character>> treeList = treeEnumerator.hartiganEnumerate();
         Parser parser = new Parser();
         System.out.println("Hartigan enumerate: ");
         for (Node<Character> tree : treeList) {
-            System.out.println(parser.toString(tree, false) + " Score: " + Hartigan.bottomUp(tree, worldSet));
+            System.out.println(parser.toString(tree, false) + " Score: " + Hartigan.bottomUp(tree, worldSet, chars));
         }
     }
 

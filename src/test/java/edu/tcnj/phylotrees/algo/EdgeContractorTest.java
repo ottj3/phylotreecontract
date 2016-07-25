@@ -16,11 +16,11 @@ public class EdgeContractorTest {
 
     @Test
     public void testContraction() {
-        int NUM_TRIALS = 10;
-        ExecutorService executorService = Executors.newSingleThreadExecutor(); // change to newFixedThreadPool(x) for parallel processing on x cores
+        int NUM_TRIALS = 1;
+        ExecutorService executorService = Executors.newFixedThreadPool(2); // change to newFixedThreadPool(x) for parallel processing on x cores
         List<Callable<long[]>> callables = new ArrayList<>();
         List<Future<long[]>> futures;
-        int[] treeSizes = {4, 5, 6, 7, 8/*, 9, 10, 11, 12, 13, 14, 15*/};
+        int[] treeSizes = {4, 5, 6, 7/*, 8/*, 9, 10, 11, 12, 13, 14, 15*/};
 
         List<List<String>> dataPerTrial = new ArrayList<>();
         for (int i = 0; i < NUM_TRIALS; i++) {
@@ -121,8 +121,9 @@ public class EdgeContractorTest {
     }
 
     public long[] runMixed(List<Node<Character>> species, CharacterList<Character> worldSet, int trialNum) {
+        int chars = species.get(0).root.size();
         long before = System.currentTimeMillis();
-        MixedTreeEnumerator<Character> treeEnumerator = new MixedTreeEnumerator<>(species, worldSet);
+        MixedTreeEnumerator<Character> treeEnumerator = new MixedTreeEnumerator<>(species, worldSet, chars);
         Set<Node<Character>> mostParsimonious = treeEnumerator.hartiganEnumerate();
         Set<Node<Character>> mostCompact = new HashSet<>();
         int mostCompactSize = -1;
@@ -143,15 +144,16 @@ public class EdgeContractorTest {
     }
 
     public long[] runCubic(List<Node<Character>> species, CharacterList<Character> worldSet, int trialNum) {
+        int chars = species.iterator().next().root.size();
         long before = System.currentTimeMillis();
-        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species);
+        CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species, chars);
         Set<Node<Character>> mostParsimonious = treeEnumerator.fitchEnumerate();
         List<Node<Character>> mostCompact = new ArrayList<>();
         int numContractions = 0;
         int mostCompactSize = Integer.MAX_VALUE;
         int initialSize = mostParsimonious.iterator().next().size();
         for (Node<Character> tree : mostParsimonious) {
-            EdgeContractor<Character> edgeContractor = new EdgeContractor<>(worldSet);
+            EdgeContractor<Character> edgeContractor = new EdgeContractor<>(worldSet, chars);
             for (Node<Character> compactTree : edgeContractor.edgeContraction(tree)) {
                 int thisSize = compactTree.size();
                 if (thisSize <= mostCompactSize) {

@@ -179,33 +179,33 @@ public class ParserTest {
     }
 
     private static Node<Integer> genTestTree() {
-        Node.chars = 5;
+        int chars = 5;
         Node<Integer> root = new Node<>("");
-        genRecursive(root);
+        genRecursive(root, chars);
         return root;
     }
 
     private static int leaves = 0;
     private static final int MAX_LEAVES = 1000;
     private static final double DECAY = 0.5;
-    private static void genRecursive(Node<Integer> current) {
+    private static void genRecursive(Node<Integer> current, int chars) {
         if (leaves > MAX_LEAVES) return;
         if (Math.random() < DECAY) {
             Node<Integer> left = new Node<>("");
             current.children.add(left);
             left.parent = current;
-            genRecursive(left);
+            genRecursive(left, chars);
         }
         if (Math.random() < DECAY) {
             Node<Integer> right = new Node<>("");
             current.children.add(right);
             right.parent = current;
-            genRecursive(right);
+            genRecursive(right, chars);
         }
         if (current.children.isEmpty()) {
             current.label = String.valueOf(leaves++);
-            current.root = Node.sets();
-            for (int i = 0; i < Node.chars; i++) {
+            current.root = Node.sets(chars);
+            for (int i = 0; i < chars; i++) {
                 current.root.get(i).add((int) (Math.random() * 3));
             }
         }

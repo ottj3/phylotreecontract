@@ -21,9 +21,12 @@ public class EdgeContractor<S> {
     private Set<Node<S>> bestTree;
     //(Used for Hartigan) the set of all possible character states
     private CharacterList<S> worldSet = new CharacterList<>();
+    //the number of characters a species has (Node.chars, passed in to avoid overhead)
+    private int chars = 0;
 
-    public EdgeContractor(CharacterList<S> worldSet) {
+    public EdgeContractor(CharacterList<S> worldSet, int chars) {
         this.worldSet = worldSet;
+        this.chars = chars;
     }
 
     /**
@@ -35,14 +38,14 @@ public class EdgeContractor<S> {
     public Set<Node<S>> edgeContraction(Node<S> root) {
         bestSize = Integer.MAX_VALUE;
         bestTree = new HashSet<>();
-        Hartigan.bottomUp(root, worldSet);
+        Hartigan.bottomUp(root, worldSet, chars);
         edgeContractionRecursive(root);
         return bestTree;
     }
 
     private void edgeContractionRecursive(Node<S> root) {
         //get list of zero-cost edges while also calculating the nodes' root sets
-        List<List<Node<S>>> edgeList = Hartigan.topDown(root);
+        List<List<Node<S>>> edgeList = Hartigan.topDown(root, chars);
         //bound the method: if the tree can never become the most compact, break out of recursion
         if (root.size() - edgeList.size() > bestSize) {
             return;
@@ -98,7 +101,7 @@ public class EdgeContractor<S> {
         while (parent != null) {
             if (!parent.labelled) {
                 //Use hartigan to get the new VU and VL sets
-                Hartigan.hartigan(parent, worldSet);
+                Hartigan.hartigan(parent, worldSet, chars);
             } //If the parent is labelled, normally fastHartigans would be done. However, since
             // the full bottomUp method has already been done (by edgeContraction(...)), this is unnecessary.
 
@@ -130,7 +133,7 @@ public class EdgeContractor<S> {
         //As with contractEdge, the VU and VL sets of the node and its ancestors must be recalculated.
         while (parent != null) {
             if (!parent.labelled) {
-                Hartigan.hartigan(parent, worldSet);
+                Hartigan.hartigan(parent, worldSet, chars);
             }
             parent = parent.parent;
         }
