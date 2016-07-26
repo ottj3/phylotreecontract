@@ -6,9 +6,7 @@ import edu.tcnj.phylotrees.data.CharacterList;
 import edu.tcnj.phylotrees.data.Node;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PhyloTreeContract {
 
@@ -99,12 +97,39 @@ public class PhyloTreeContract {
     }
 
     private void getTimingInfoFromInput() throws IOException {
-        //TODO decide how these parameters will be set
-        int numTrials = 3;
-        int minTreeSize = 4;
-        int maxTreeSize = 6;
-        boolean multithreaded = true;
-
+        Scanner sc = new Scanner(System.in);
+        int numTrials = 0, minTreeSize = 0, maxTreeSize = 0;
+        boolean multithreaded;
+        do {
+            System.out.print("Enter the number of trials to be run: ");
+            try {
+                numTrials = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Wrong input format.");
+                sc.nextLine();
+            }
+        } while (numTrials <= 0);
+        do {
+            System.out.print("Enter the minimum number of species per tree: ");
+            try {
+                minTreeSize = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Wrong input format.");
+                sc.nextLine();
+            }
+        } while (minTreeSize <= 0);
+        do {
+            System.out.print("Enter the maximum number of species per tree: ");
+            try {
+                maxTreeSize = sc.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Wrong input format.");
+                sc.nextLine();
+            }
+        } while (maxTreeSize < minTreeSize);
+        System.out.print("Should this be run on multiple threads? (y or n): ");
+        multithreaded = (sc.next().equals("y"));
+        System.out.println("Running " + numTrials + " trials for trees from " + minTreeSize + " to " + maxTreeSize + " input species with" + (multithreaded ? "" : "out") + " multithreading.");
         List<String> rawSpecies = readSpecies();
         TreeTiming.runTiming(rawSpecies, numTrials, minTreeSize, maxTreeSize, multithreaded);
     }
