@@ -14,7 +14,8 @@ public class PhyloTreeContract {
 
     public static void main(String[] args) {
         try {
-            (new PhyloTreeContract()).contractCubicFromInput();
+            (new PhyloTreeContract()).enumerateCubicFromInput();
+            (new PhyloTreeContract()).getTimingInfoFromInput();
         } catch (IOException e) {
             System.out.println("There was an error reading the input file.");
             e.printStackTrace();
@@ -23,7 +24,22 @@ public class PhyloTreeContract {
 
     private Parser parser = new Parser();
 
-    private void contractCubicFromInput() throws IOException {
+    private void enumerateCubicFromInput() throws IOException {
+        List<String> rawSpecies = readSpecies();
+        List<Node<Character>> species = new ArrayList<>();
+        List<Set<Character>> worldSet0 = new ArrayList<>();
+        parser.speciesList(rawSpecies, species, worldSet0);
+        CharacterList<Character> worldSet = new CharacterList<>(worldSet0);
+
+        System.out.println("Now enumerating cubic trees and contracting them to find"
+                + " the most parsimonious, most compact mixed-labelled tree. Note that"
+                + " some trees may be duplicates or re-rooted versions of others.");
+        System.out.println("(this may take some time)");
+
+        runCubic(species, worldSet);
+    }
+
+    private List<String> readSpecies() throws IOException {
         System.out.println("Reading species input from file \"input.txt\".");
         File file = new File("input.txt");
 
@@ -34,17 +50,8 @@ public class PhyloTreeContract {
         while ((line = br.readLine()) != null) {
             rawSpecies.add(line);
         }
-
-        List<Node<Character>> species = new ArrayList<>();
-        List<Set<Character>> worldSet0 = new ArrayList<>();
-        parser.speciesList(rawSpecies, species, worldSet0);
-        CharacterList<Character> worldSet = new CharacterList<>(worldSet0);
-
-        System.out.println("Read " + species.size() + " species from file. Now enumerating cubic trees and"
-                + " contracting them to find the most parsimonious, most compact mixed-labelled tree.");
-        System.out.println("(this may take some time)");
-
-        runCubic(species, worldSet);
+        System.out.println("Read " + rawSpecies.size() + " species from file.");
+        return rawSpecies;
     }
 
     private void runCubic(List<Node<Character>> species, CharacterList<Character> worldSet) {
@@ -52,10 +59,29 @@ public class PhyloTreeContract {
         long before = System.currentTimeMillis();
         CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species, chars);
         Set<Node<Character>> mostParsimonious = treeEnumerator.fitchEnumerate();
+        List<Node<Character>> mostCompact = compactCubic(mostParsimonious, worldSet, chars);
+
+        long time = System.currentTimeMillis() - before;
+        int mostCompactSize = mostCompact.get(0).size();
+        int cubicSize = mostParsimonious.iterator().next().size();
+        System.out.println("Cubic Tree Contraction:\n"
+                + "Species: " + species.size() + "\n"
+                + "Time taken: " + time + "ms\n"
+                + "Number of most parsimonious cubic trees: " + mostParsimonious.size() + "\n"
+                + "Number of most compacted mixed-labelled trees: " + mostCompact.size() + "\n"
+                + "Size of most compact mixed-labelled trees: " + mostCompact.get(0).size()
+                + " (" + (cubicSize - mostCompactSize) + " contractions)"
+        );
+        System.out.println("List of best trees (structure only): ");
+        for (Node<Character> node : mostCompact) {
+            System.out.println(parser.toString(node, false));
+        }
+    }
+
+    private List<Node<Character>> compactCubic(Set<Node<Character>> mostParsimonious,
+                                               CharacterList<Character> worldSet, int chars) {
         List<Node<Character>> mostCompact = new ArrayList<>();
-        int numContractions = 0;
         int mostCompactSize = Integer.MAX_VALUE;
-        int initialSize = mostParsimonious.iterator().next().size();
         for (Node<Character> tree : mostParsimonious) {
             EdgeContractor<Character> edgeContractor = new EdgeContractor<>(worldSet, chars);
             for (Node<Character> compactTree : edgeContractor.edgeContraction(tree)) {
@@ -65,24 +91,21 @@ public class PhyloTreeContract {
                         mostCompact.clear();
                     }
                     mostCompact.add(compactTree);
-                    numContractions = initialSize - compactTree.size();
                     mostCompactSize = thisSize;
                 }
             }
         }
+        return mostCompact;
+    }
 
-        long time = System.currentTimeMillis() - before;
-        System.out.println("Cubic Tree Contraction:\n"
-                + "Species: " + species.size() + "\n"
-                + "Time taken: " + time + "ms\n"
-                + "Number of most parsimonious cubic trees: " + mostParsimonious.size() + "\n"
-                + "Number of most compacted mixed-labelled trees: " + mostCompact.size() + "\n"
-                + "Size of most compact mixed-labelled trees: " + mostCompact.get(0).size()
-                + " (" + numContractions + " contractions)"
-        );
-        System.out.println("List of best trees (structure only): ");
-        for (Node<Character> node : mostCompact) {
-            System.out.println(parser.toString(node, false));
-        }
+    private void getTimingInfoFromInput() throws IOException {
+        //TODO decide how these parameters will be set
+        int numTrials = 3;
+        int minTreeSize = 4;
+        int maxTreeSize = 6;
+        boolean multithreaded = true;
+
+        List<String> rawSpecies = readSpecies();
+        TreeTiming.runTiming(rawSpecies, numTrials, minTreeSize, maxTreeSize, multithreaded);
     }
 }
