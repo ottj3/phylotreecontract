@@ -4,6 +4,7 @@ import edu.tcnj.phylotrees.mixedweight.data.Node;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -41,7 +42,7 @@ public class SankoffTest {
         List<List<Node>> zeroCost = Sankoff.topDown(root, weights, chars);
         assertEquals("Wrong edge list", 8, zeroCost.size());
         EdgeContractor edgeContractor = new EdgeContractor(weights, chars);
-        Node compacted = edgeContractor.edgeContraction(root);
+        Set<Node> compacted = edgeContractor.edgeContraction(root);
     }
 
     @Test
@@ -71,6 +72,6 @@ public class SankoffTest {
         List<List<Node>> zeroCost = Sankoff.topDown(root, weights, chars);
         assertEquals("Wrong edge list", 3, zeroCost.size());
         EdgeContractor edgeContractor = new EdgeContractor(weights, chars);
-        Node compacted = edgeContractor.edgeContraction(root);
+        Set<Node> compacted = edgeContractor.edgeContraction(root);
     }
 }

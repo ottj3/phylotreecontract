@@ -2,7 +2,9 @@ package edu.tcnj.phylotrees.mixedweight.algo;
 
 import edu.tcnj.phylotrees.mixedweight.data.Node;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class to contract a given tree to its smallest possible size
@@ -14,7 +16,7 @@ public class EdgeContractor {
     //The smallest size of a tree seen yet
     private int bestSize = Integer.MAX_VALUE;
     //The latest tree to be seen of the smallest size
-    private Node bestTree;
+    private Set<Node> bestTree;
     //(Used for Sankoff) the cost of each mutation
     private double[][] weights;
     //the number of characters a species has (Node.chars, passed in to avoid overhead)
@@ -32,8 +34,9 @@ public class EdgeContractor {
      * @param root the root of the tree to be compacted
      * @return the root of the compacted tree
      */
-    public Node edgeContraction(Node root) {
+    public Set<Node> edgeContraction(Node root) {
         bestSize = Integer.MAX_VALUE;
+        bestTree = new HashSet<>();
         Sankoff.bottomUp(root, weights, chars);
         edgeContractionRecursive(root);
         return bestTree;
@@ -43,7 +46,7 @@ public class EdgeContractor {
         //get list of zero-cost edges
         List<List<Node>> edgeList = Sankoff.topDown(root, weights, chars);
         //bound the method: if the tree can never become the most compact, break out of recursion
-        if (root.size() - edgeList.size() >= bestSize) {
+        if (root.size() - edgeList.size() > bestSize) {
             return;
         }
 //        if (edgeList.size() + 1 > oldSize) {
@@ -53,9 +56,12 @@ public class EdgeContractor {
         if (edgeList.size() == 0) {
             int treeSize = root.size();
             //If the tree size is at least as compact as the best seen so far, set it as bestSize and bestTree
-            if (treeSize <= bestSize) {
+            if (treeSize == bestSize) {
+                bestTree.add(root.clone());
+            } else if (treeSize < bestSize) {
+                bestTree.clear();
+                bestTree.add(root.clone());
                 bestSize = treeSize;
-                bestTree = root.clone();
             }
         } else {
             //else, for every edge in list, contract edge and then recurse

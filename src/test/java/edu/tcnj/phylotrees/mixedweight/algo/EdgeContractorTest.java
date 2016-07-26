@@ -188,13 +188,13 @@ public class EdgeContractorTest {
         int mostCompactSize = Integer.MAX_VALUE;
         for (Node tree : mostParsimonious) {
             EdgeContractor edgeContractor = new EdgeContractor(weights, chars);
-            Node compactTree = edgeContractor.edgeContraction(tree);
-            int thisSize = compactTree.size();
+            Set<Node> compactTrees = edgeContractor.edgeContraction(tree);
+            int thisSize = compactTrees.iterator().next().size();
             if (thisSize <= mostCompactSize) {
-                if (compactTree.size() < mostCompactSize) {
+                if (compactTrees.size() < mostCompactSize) {
                     mostCompact.clear();
                 }
-                mostCompact.add(compactTree);
+                mostCompact.addAll(compactTrees);
                 mostCompactSize = thisSize;
             }
         }
