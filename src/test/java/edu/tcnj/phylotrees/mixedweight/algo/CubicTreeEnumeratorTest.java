@@ -29,9 +29,9 @@ public class CubicTreeEnumeratorTest extends TreeEnumeratorTest {
         List<Node> treeNodes = new ArrayList();
         CubicTreeEnumerator treeEnumerator;
         for (int i = 1; i <= treeSize; i++) {
-            treeNodes.add(new Node(((Integer) i).toString()));
+            treeNodes.add(new Node(((Integer) i).toString(), chars));
         }
-        treeEnumerator = new CubicTreeEnumerator(new ArrayList(treeNodes));
+        treeEnumerator = new CubicTreeEnumerator(new ArrayList(treeNodes), 0);
         int expectedScore = 1;
         for (int j = 2 * treeSize - 5; j > 0; j -= 2) {
             expectedScore *= j;
@@ -48,18 +48,18 @@ public class CubicTreeEnumeratorTest extends TreeEnumeratorTest {
     public void testSankoff() {
         long start = System.currentTimeMillis();
         getData(treeSize);
-        CubicTreeEnumerator treeEnumerator = new CubicTreeEnumerator(species, weights);
+        CubicTreeEnumerator treeEnumerator = new CubicTreeEnumerator(species, weights, chars);
         Set<Node> treeList = treeEnumerator.sankoffEnumerate();
 //        System.out.println("Fitch enumerate: ");
         for (Node tree : treeList) {
 //            System.out.println(parser.toString(tree) + " Score: " + Sankoff.bottomUp(tree, weights));
-            EdgeContractor edgeContractor = new EdgeContractor(weights);
+            EdgeContractor edgeContractor = new EdgeContractor(weights, chars);
             Node compacted = edgeContractor.edgeContraction(tree);
-            System.out.println(Parser.toString(compacted) + " Compacted Score: " + Sankoff.bottomUp(compacted, weights));
+            System.out.println(Parser.toString(compacted) + " Compacted Score: " + Sankoff.bottomUp(compacted, weights, chars));
             assertEquals("Scores differ between:\n" + Parser.toString(tree) + "\n" + Parser.toString(compacted),
-                    Sankoff.bottomUp(tree, weights), Sankoff.bottomUp(compacted, weights), 0.01);
+                    Sankoff.bottomUp(tree, weights, chars), Sankoff.bottomUp(compacted, weights, chars), 0.01);
             assertEquals("Still more zero-cost edges in:\n" + Parser.toString(compacted), 0,
-                    Sankoff.topDown(compacted, weights).size());
+                    Sankoff.topDown(compacted, weights, chars).size());
         }
         System.out.println("Took " + (System.currentTimeMillis() - start) + "ms for trees of size " + treeSize + ".");
     }
@@ -69,6 +69,6 @@ public class CubicTreeEnumeratorTest extends TreeEnumeratorTest {
         //[A-Za-z0-9:;.,\(\) ]*
         Node compactedTree = Parser.fromString("((((B:0.0,C:0.0):0.0,(F:0.0)D:0.0):0.0,E:0.0):0.0)A:0.0;");
         Parser.fillNodes(compactedTree, testData);
-        System.out.println(Sankoff.bottomUp(compactedTree, weights));
+        System.out.println(Sankoff.bottomUp(compactedTree, weights, chars));
     }
 }

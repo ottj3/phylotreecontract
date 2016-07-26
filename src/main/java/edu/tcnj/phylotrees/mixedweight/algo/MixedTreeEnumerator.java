@@ -7,12 +7,13 @@ import java.util.Set;
 
 public class MixedTreeEnumerator extends TreeEnumerator {
 
-    public MixedTreeEnumerator(List<Node> labelledNodes) {
+    public MixedTreeEnumerator(List<Node> labelledNodes, int chars) {
         this.labelledNodes = labelledNodes;
+        this.chars = chars;
     }
 
-    public MixedTreeEnumerator(List<Node> labelledNodes, double[][] weights) {
-        this.labelledNodes = labelledNodes;
+    public MixedTreeEnumerator(List<Node> labelledNodes, double[][] weights, int chars) {
+        this(labelledNodes, chars);
         this.weights = weights;
     }
 
@@ -86,13 +87,13 @@ public class MixedTreeEnumerator extends TreeEnumerator {
     protected void sankoffEnumerateRecursive(Node current, int size) {
         //Same as enumerateRecursive, but bounded using hartigan to score the trees in-progress
         if (size == labelledNodes.size()) {
-            double score = Sankoff.bottomUp(root, weights);
+            double score = Sankoff.bottomUp(root, weights, chars);
 //            double score = Sankoff.bottomUp(rootAtUnlabelled(), weights);
 //            if (normalScore != score) {
 //                System.out.println(normalScore + " " + score);
 //            }
             updateMPlist(score);
-        } else if (Sankoff.bottomUp(root, weights) <= parsimonyScore || parsimonyScore == -1) {
+        } else if (Sankoff.bottomUp(root, weights, chars) <= parsimonyScore || parsimonyScore == -1) {
             case1(current, size, true);
             case2(current, size, true);
             case3(current, size, true);
@@ -111,7 +112,7 @@ public class MixedTreeEnumerator extends TreeEnumerator {
             case1(current.children.get(0), size, isScored);
         }
         if (current != root) {
-            Node internal = new Node("");
+            Node internal = new Node("", chars);
             Node leaf = labelledNodes.get(size).clone();
             Node parent = current.parent;
 
@@ -199,7 +200,7 @@ public class MixedTreeEnumerator extends TreeEnumerator {
                 enumerateRecursive(root, size + 1);
             }
 
-            current.data = Node.sets();
+            current.data = Node.sets(chars);
             current.costs = null;
             current.labelled = false;
             current.label = "";

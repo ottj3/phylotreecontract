@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * themselves can safely be modified (by adding and removing {@code S} objects).</li>
  * <li>When constructing the {@code CharacterList}, pre-create a list of the sets
  * and use the constructor {@link #CharacterList(List)}, as this avoids creating
- * copies for each added element. (This can also be done via {@link Node#sets()})</li>
+ * copies for each added element. (This can also be done via {@link Node#sets(int)})</li>
  * </ul>
  *
  */

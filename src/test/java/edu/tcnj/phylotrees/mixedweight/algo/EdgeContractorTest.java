@@ -110,7 +110,7 @@ public class EdgeContractorTest {
     @Test
     public void testContraction() {
         final int NUM_TRIALS = 10;
-        int[] treeSizes = {4, 5, 6, 7/*, 8, 9/*, 10, 11, 12, 13, 14/*, 15*/};
+        int[] treeSizes = {4, 5, 6/*, 7/*, 8, 9/*, 10, 11, 12, 13, 14/*, 15*/};
         for (final int treeSize : treeSizes) {
             for (int i = 0; i < NUM_TRIALS; i++) {
                 List<String> lines = new ArrayList<>();
@@ -126,12 +126,12 @@ public class EdgeContractorTest {
                         {3, 2, 1, 0}
                 };
                 final List<Node> species = parser.speciesList(lines);
-
-                CubicTreeEnumerator cubicTreeEnumerator = new CubicTreeEnumerator(species, weights);
-                Set<Node> mostCompactCubic = compactCubic(cubicTreeEnumerator.sankoffEnumerate(), weights);
+                int chars = species.get(0).data.size();
+                CubicTreeEnumerator cubicTreeEnumerator = new CubicTreeEnumerator(species, weights, chars);
+                Set<Node> mostCompactCubic = compactCubic(cubicTreeEnumerator.sankoffEnumerate(), weights, chars);
                 int cubicSize = mostCompactCubic.iterator().next().size();
 
-                MixedTreeEnumerator mixedTreeEnumerator = new MixedTreeEnumerator(species, weights);
+                MixedTreeEnumerator mixedTreeEnumerator = new MixedTreeEnumerator(species, weights, chars);
                 Set<Node> mostCompactMixed = compactMixed(mixedTreeEnumerator.sankoffEnumerate());
                 int mixedSize = mostCompactMixed.iterator().next().size();
                 assertEquals("Cubic contracted to " + cubicSize + " while mixed were of size " + mixedSize,
@@ -142,8 +142,9 @@ public class EdgeContractorTest {
     }
 
     public long[] runMixed(List<Node> species, double[][] weights) {
+        int chars = species.get(0).data.size();
         long before = System.currentTimeMillis();
-        MixedTreeEnumerator treeEnumerator = new MixedTreeEnumerator(species, weights);
+        MixedTreeEnumerator treeEnumerator = new MixedTreeEnumerator(species, weights, chars);
         Set<Node> mostParsimonious = treeEnumerator.sankoffEnumerate();
         Set<Node> mostCompact = compactMixed(mostParsimonious);
 
@@ -170,10 +171,11 @@ public class EdgeContractorTest {
     }
 
     public long[] runCubic(List<Node> species, double[][] weights) {
+        int chars = species.get(0).data.size();
         long before = System.currentTimeMillis();
-        CubicTreeEnumerator treeEnumerator = new CubicTreeEnumerator(species);
+        CubicTreeEnumerator treeEnumerator = new CubicTreeEnumerator(species, chars);
         Set<Node> mostParsimonious = treeEnumerator.sankoffEnumerate();
-        Set<Node> mostCompact = compactCubic(mostParsimonious, weights);
+        Set<Node> mostCompact = compactCubic(mostParsimonious, weights, chars);
         int initialSize = mostParsimonious.iterator().next().size();
         int numContractions = initialSize - mostCompact.iterator().next().size();
         long time = System.currentTimeMillis() - before;
@@ -181,11 +183,11 @@ public class EdgeContractorTest {
         return new long[]{time, mostParsimonious.size(), mostCompact.size(), numContractions};
     }
 
-    private Set<Node> compactCubic(Set<Node> mostParsimonious, double[][] weights) {
+    private Set<Node> compactCubic(Set<Node> mostParsimonious, double[][] weights, int chars) {
         Set<Node> mostCompact = new HashSet<>();
         int mostCompactSize = Integer.MAX_VALUE;
         for (Node tree : mostParsimonious) {
-            EdgeContractor edgeContractor = new EdgeContractor(weights);
+            EdgeContractor edgeContractor = new EdgeContractor(weights, chars);
             Node compactTree = edgeContractor.edgeContraction(tree);
             int thisSize = compactTree.size();
             if (thisSize <= mostCompactSize) {

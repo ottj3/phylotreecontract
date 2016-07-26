@@ -28,8 +28,11 @@ public abstract class TreeEnumerator {
     //The count of all trees enumerated (only maintained in the basic enumerate methods, not in fitch or hartigan)
     protected int treeCounter = 0;
 
+    //the number of characters a species has (Node.chars, passed in to avoid overhead)
+    protected int chars = 0;
+
     //The root of the current tree
-    protected Node root = new Node("");
+    protected Node root = new Node("", chars);
 
     //Add internal between current and parent, and then make leaf a child of internal
     protected void addNodeToEdge(Node current, Node parent, Node internal, Node leaf) {

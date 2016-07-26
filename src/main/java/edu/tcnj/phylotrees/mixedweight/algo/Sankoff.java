@@ -14,20 +14,21 @@ public class Sankoff {
      *
      * @param current the node being worked on currently
      * @param weights the matrix of mutation costs
+     * @param chars
      * @return
      */
-    public static double bottomUp(Node current, double[][] weights) {
+    public static double bottomUp(Node current, double[][] weights, int chars) {
         //Recursively go bottom-up (post-order traversal)
         for (Node child : current.children) {
-            bottomUp(child, weights);
+            bottomUp(child, weights, chars);
         }
 
         //Outside the if statement because magic reasons
         //Reset the node's costs in case bottomUp has been run before
-        current.initializeCosts();
+        current.initializeCosts(chars);
         //If the node is not a leaf, score it using sankoff()
         if (current.children.size() >= 1) {
-            sankoff(current, weights);
+            sankoff(current, weights, chars);
         }
         //Only important for the root: for each character, find the minimum cost,
         //And return the sum of those costs.
@@ -43,11 +44,11 @@ public class Sankoff {
     }
 
     //Sankoff's algorithm for scoring a given node based on its children's scores and mutation costs
-    private static void sankoff(Node current, double[][] weights) {
+    private static void sankoff(Node current, double[][] weights, int chars) {
         //For every child
         for (Node child : current.children) {
             //For every character
-            for (int i = 0; i < Node.chars; i++) {
+            for (int i = 0; i < chars; i++) {
                 //For every one of the parent's states
                 for (DNABase currentBase : DNABase.values()) {
                     //Find min(current cost + mutation cost) to generate the given parent base
@@ -93,13 +94,14 @@ public class Sankoff {
      * assumes that the only zero-cost mutations are between a base and itself
      *
      * @param current the current node being worked on
+     * @param chars
      * @return a list of zero-cost edges
      */
-    public static List<List<Node>> topDown(Node current, double[][] weights) {
+    public static List<List<Node>> topDown(Node current, double[][] weights, int chars) {
         List<List<Node>> edges = new ArrayList<>();
         //Special case for the root: assign it any states that had the minimum cost
         if (current.parent == null) {
-            for (int i = 0; i < Node.chars; i++) {
+            for (int i = 0; i < chars; i++) {
                 double[] costArr = current.costs.get(i);
                 double minCost = Double.POSITIVE_INFINITY;
                 for (DNABase base : DNABase.values()) {
@@ -116,8 +118,8 @@ public class Sankoff {
         } else {
             //For everything but the root, assign it any states that lead to any of the parent's states
             int cost = 0;
-            current.data = Node.sets();
-            for (int i = 0; i < Node.chars; i++) {
+            current.data = Node.sets(chars);
+            for (int i = 0; i < chars; i++) {
                 Set<DNABase> parentSet = current.parent.data.get(i);
                 for (DNABase dnaBase : parentSet) {
                     current.data.get(i).addAll(current.parentFits.get(i)[dnaBase.value]);
@@ -153,7 +155,7 @@ public class Sankoff {
         }
         //Recursively call the algorithm in a top-down (preorder) fashion
         for (Node child : current.children) {
-            edges.addAll(topDown(child, weights));
+            edges.addAll(topDown(child, weights, chars));
         }
         return edges;
     }

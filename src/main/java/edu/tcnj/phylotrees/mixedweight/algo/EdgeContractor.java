@@ -17,9 +17,12 @@ public class EdgeContractor {
     private Node bestTree;
     //(Used for Sankoff) the cost of each mutation
     private double[][] weights;
+    //the number of characters a species has (Node.chars, passed in to avoid overhead)
+    private int chars = 0;
 
-    public EdgeContractor(double[][] weights) {
+    public EdgeContractor(double[][] weights, int chars) {
         this.weights = weights;
+        this.chars = chars;
     }
 
     /**
@@ -31,14 +34,14 @@ public class EdgeContractor {
      */
     public Node edgeContraction(Node root) {
         bestSize = Integer.MAX_VALUE;
-        Sankoff.bottomUp(root, weights);
+        Sankoff.bottomUp(root, weights, chars);
         edgeContractionRecursive(root);
         return bestTree;
     }
 
     private void edgeContractionRecursive(Node root) {
         //get list of zero-cost edges
-        List<List<Node>> edgeList = Sankoff.topDown(root, weights);
+        List<List<Node>> edgeList = Sankoff.topDown(root, weights, chars);
         //bound the method: if the tree can never become the most compact, break out of recursion
         if (root.size() - edgeList.size() >= bestSize) {
             return;
@@ -90,7 +93,7 @@ public class EdgeContractor {
         while (parent.parent != null) {
             parent = parent.parent;
         }
-        Sankoff.bottomUp(parent, weights);
+        Sankoff.bottomUp(parent, weights, chars);
     }
 
     private void uncontractEdge(List<Node> edge) {
@@ -111,7 +114,7 @@ public class EdgeContractor {
         if (child.labelled) {
             parent.labelled = false;
             parent.label = "";
-            parent.data = Node.sets();
+            parent.data = Node.sets(chars);
             parent.costs = null;
         }
 
@@ -119,6 +122,6 @@ public class EdgeContractor {
         while (parent.parent != null) {
             parent = parent.parent;
         }
-        Sankoff.bottomUp(parent, weights);
+        Sankoff.bottomUp(parent, weights, chars);
     }
 }

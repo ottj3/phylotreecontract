@@ -143,7 +143,7 @@ public class Parser {
     }
 
     protected static Node nodeFromLabel(String label, double cost) {
-        Node node = new Node(label);
+        Node node = new Node(label, 0);
         node.edgeCost = cost;
         return node;
     }
@@ -161,9 +161,7 @@ public class Parser {
             String[] sp = line.split(":");
             String label = sp[0];
             String data = sp[1];
-            Node.chars = data.length();
-            Node node = new Node(label);
-            node.setData(data);
+            Node node = new Node(label, data);
             species.add(node);
         }
         return species;

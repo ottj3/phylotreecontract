@@ -32,10 +32,10 @@ public class MixedTreeEnumeratorTest extends TreeEnumeratorTest {
         MixedTreeEnumerator treeEnumerator;
 
         for (int i = 1; i <= treeSize; i++) {
-            treeNodes.add(new Node(((Integer) i).toString()));
+            treeNodes.add(new Node(((Integer) i).toString(), 0));
 //            worldSet.get(0).add(i);
         }
-        treeEnumerator = new MixedTreeEnumerator(new ArrayList(treeNodes));
+        treeEnumerator = new MixedTreeEnumerator(new ArrayList(treeNodes), 0);
         double denominator = Math.sqrt(2) * Math.exp(treeSize / 2) * Math.pow((2 - Math.exp(0.5)), treeSize - 1.5);
         double expectedSize = Math.pow(treeSize, treeSize - 2) / denominator;
         //if (i == 1) expectedScore = 1;
@@ -52,11 +52,11 @@ public class MixedTreeEnumeratorTest extends TreeEnumeratorTest {
     public void testSankoff() {
         long start = System.currentTimeMillis();
         getData(treeSize);
-        MixedTreeEnumerator treeEnumerator = new MixedTreeEnumerator(species, weights);
+        MixedTreeEnumerator treeEnumerator = new MixedTreeEnumerator(species, weights, chars);
         Set<Node> treeList = treeEnumerator.sankoffEnumerate();
 //        System.out.println("Hartigan enumerate: ");
         for (Node tree : treeList) {
-            System.out.println(Parser.toString(tree) + " Score: " + Sankoff.bottomUp(tree, weights) + " Size: " + tree.size());
+            System.out.println(Parser.toString(tree) + " Score: " + Sankoff.bottomUp(tree, weights, chars) + " Size: " + tree.size());
         }
         System.out.println("Took " + (System.currentTimeMillis() - start) + "ms for trees of size " + treeSize + ".");
     }
@@ -66,18 +66,18 @@ public class MixedTreeEnumeratorTest extends TreeEnumeratorTest {
     public void testRooting() {
         long start = System.currentTimeMillis();
         getData(treeSize);
-        MixedTreeEnumerator treeEnumerator = new MixedTreeEnumerator(species, weights);
+        MixedTreeEnumerator treeEnumerator = new MixedTreeEnumerator(species, weights, chars);
         Set<Node> treeList = treeEnumerator.sankoffEnumerate();
         for (Node tree : treeList) {
 //            System.out.println("Working on: " + Parser.toString(tree));
-            double score = Sankoff.bottomUp(tree, weights);
+            double score = Sankoff.bottomUp(tree, weights, chars);
             nodes.clear();
             getNodes(tree);
             for (Node node : nodes) {
                 reroot(node);
 //                System.out.println(Parser.toString(node));
                 assertEquals("Scores differ between:\n" + Parser.toString(tree) + "\n" + Parser.toString(node),
-                        score, Sankoff.bottomUp(node, weights), 0.01);
+                        score, Sankoff.bottomUp(node, weights, chars), 0.01);
             }
         }
         System.out.println("Took " + (System.currentTimeMillis() - start) + "ms for trees of size " + treeSize + ".");

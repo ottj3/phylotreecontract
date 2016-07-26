@@ -8,6 +8,7 @@ import java.util.List;
 
 public abstract class TreeEnumeratorTest {
     public static List<String> testData = new ArrayList<>();
+    public static int chars = 0;
 
     static {
         testData.add("A:GAGGACCCCAGATATTACGCGGGTCGAACA");
@@ -56,6 +57,7 @@ public abstract class TreeEnumeratorTest {
 
         Parser parser = new Parser();
         species = parser.speciesList(lines);
+        chars = species.get(0).data.size();
     }
 
 }

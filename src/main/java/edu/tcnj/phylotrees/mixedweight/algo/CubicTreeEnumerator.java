@@ -8,12 +8,13 @@ import java.util.Set;
 
 public class CubicTreeEnumerator extends TreeEnumerator {
 
-    public CubicTreeEnumerator(List<Node> labelledNodes) {
+    public CubicTreeEnumerator(List<Node> labelledNodes, int chars) {
         this.labelledNodes = labelledNodes;
+        this.chars = chars;
     }
 
-    public CubicTreeEnumerator(List<Node> labelledNodes, double[][] weights) {
-        this.labelledNodes = labelledNodes;
+    public CubicTreeEnumerator(List<Node> labelledNodes, double[][] weights, int chars) {
+        this(labelledNodes, chars);
         this.weights = weights;
     }
 
@@ -33,7 +34,7 @@ public class CubicTreeEnumerator extends TreeEnumerator {
             Node.linkNodes(root, labelledNodes.get(1).clone());
         } else {
             //3+ nodes: make an unlabelled node the root, with the first 3 nodes as its children
-            root = new Node("");
+            root = new Node("", chars);
 
             for (int i = 0; i < 3; i++) {
                 Node.linkNodes(root, labelledNodes.get(i).clone());
@@ -76,7 +77,7 @@ public class CubicTreeEnumerator extends TreeEnumerator {
             if (current != root) {
                 //Create an unlabelled node between the current node and its parent, and then add the next
                 //leaf as another child of the new unlabelled node
-                Node internal = new Node("");
+                Node internal = new Node("", chars);
                 Node leaf = labelledNodes.get(size).clone();
                 Node parent = current.parent;
 
@@ -113,7 +114,7 @@ public class CubicTreeEnumerator extends TreeEnumerator {
         if (size == labelledNodes.size()) {
             //Root the tree to make it bifurcating (to work in Fitch) and score it
 
-            double score = Sankoff.bottomUp(root, weights);
+            double score = Sankoff.bottomUp(root, weights, chars);
             //Add it to the list of most parsimonious trees if its score is the best
             updateMPlist(score);
         } else {
@@ -123,12 +124,12 @@ public class CubicTreeEnumerator extends TreeEnumerator {
             }
 
             //get its current parsimony score
-            double thisScore = Sankoff.bottomUp(root, weights);
+            double thisScore = Sankoff.bottomUp(root, weights, chars);
 
             //Same as enumerateRecursive but bounded: only continue if there is no best parsimony
             //score or if this tree is at least as good as the most parsimonious
             if (current != root && (thisScore <= parsimonyScore || parsimonyScore == -1)) {
-                Node internal = new Node("");
+                Node internal = new Node("", chars);
                 Node leaf = labelledNodes.get(size).clone();
                 Node parent = current.parent;
 

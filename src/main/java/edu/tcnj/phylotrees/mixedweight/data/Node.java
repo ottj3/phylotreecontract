@@ -8,14 +8,6 @@ import java.util.Set;
 public class Node implements Cloneable {
 
     /**
-     * The number of characters in each species. This should always be kept the same
-     * when operating on a single set of input data. All the algorithms assume that
-     * all input species have the same number of Characters, and bad things will
-     * happen if they do not.
-     */
-    public static int chars;
-
-    /**
      * A "name" string for the node, used purely for humans to identify nodes.
      */
     public String label;
@@ -24,7 +16,7 @@ public class Node implements Cloneable {
      * The sets assigned to a node during top down (or during node creation for a labelled node)
      * that function similarly to hartigan's root sets with regards to finding zero-cost edges
      */
-    public CharacterList data = sets();
+    public CharacterList data;
 
     /**
      * The cost of the node.
@@ -66,21 +58,23 @@ public class Node implements Cloneable {
      * Construct a node with the given name.
      *
      * @param label a name for the node, or an empty string for an unlabelled node
+     * @param chars the number of characters a species has
      */
-    public Node(String label) {
-        initializeFits();
-        initializeCosts();
+    public Node(String label, int chars) {
+        this.data = sets(chars);
+        initializeFits(chars);
+        initializeCosts(chars);
         this.label = label;
         this.labelled = !label.isEmpty();
     }
 
     /**
      * Construct a node with the given name and cost.
+     *  @param label a name for the node, or an empty string for an unlabelled node
      *
-     * @param label a name for the node, or an empty string for an unlabelled node
      */
     public Node(String label, String data) {
-        this(label);
+        this(label, data.length());
         this.setData(data);
     }
 
@@ -90,8 +84,8 @@ public class Node implements Cloneable {
      * @param data A string of character states from some known species
      */
     public void setData(String data) {
-        chars = data.length();
-        for (int i = 0; i < Node.chars; i++) {
+        int chars = data.length();
+        for (int i = 0; i < chars; i++) {
             for (DNABase dnaBase : DNABase.values()) {
                 if (DNABase.valueOf(data.substring(i, i + 1)) == dnaBase) {
                     costs.get(i)[dnaBase.value] = 0;
@@ -108,7 +102,7 @@ public class Node implements Cloneable {
      * If costs is null or empty, initialize it, otherwise set all
      * non-infinite values to zero.
      */
-    public void initializeCosts() {
+    public void initializeCosts(int chars) {
         if (costs == null || costs.isEmpty()) {
             costs = new ArrayList<>(chars);
             for (int i = 0; i < chars; i++) {
@@ -129,7 +123,7 @@ public class Node implements Cloneable {
     /**
      * Initialize the parentFits of a node to an empty list
      */
-    public void initializeFits() {
+    public void initializeFits(int chars) {
         parentFits = new ArrayList<>(chars);
         for (int i = 0; i < chars; i++) {
             parentFits.add(new HashSet[DNABase.values().length]);
@@ -143,12 +137,10 @@ public class Node implements Cloneable {
 
     /**
      * Utility method to generate a list of sets, one set for each Character in a species.
-     * <p>Callers should be responsible for ensuring that {@link #chars} is set before
-     * calling this method.</p>
      *
      * @return an empty but initialized {@link CharacterList} for a node with sets for each character
      */
-    public static CharacterList sets() {
+    public static CharacterList sets(int chars) {
         List<Set<DNABase>> sets = new ArrayList<>(chars);
         for (int i = chars; i-- > 0; ) {
             sets.add(new HashSet<DNABase>());
@@ -190,7 +182,7 @@ public class Node implements Cloneable {
      */
     @Override
     public Node clone() {
-        Node newNode = new Node(this.label);
+        Node newNode = new Node(this.label, this.costs.size());
         for (Node child : children) {
             Node newChild = child.clone();
             newChild.parent = newNode;
