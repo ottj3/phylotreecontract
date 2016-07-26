@@ -1,7 +1,7 @@
-package edu.tcnj.phylotrees;
+package edu.tcnj.phylotrees.simpleweight;
 
 
-import edu.tcnj.phylotrees.data.Node;
+import edu.tcnj.phylotrees.simpleweight.data.Node;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

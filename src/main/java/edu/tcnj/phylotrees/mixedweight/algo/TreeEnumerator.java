@@ -1,38 +1,38 @@
-package edu.tcnj.phylotrees.algo;
+package edu.tcnj.phylotrees.mixedweight.algo;
 
-import edu.tcnj.phylotrees.data.CharacterList;
-import edu.tcnj.phylotrees.data.Node;
+import edu.tcnj.phylotrees.mixedweight.data.Node;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class TreeEnumerator<S> {
+public abstract class TreeEnumerator {
 
-    //The set of all possible characters (used in Hartigan)
-    protected CharacterList<S> worldSet = new CharacterList<>();
+    double[][] weights = {
+            {0, 1, 1, 1},
+            {1, 0, 1, 1},
+            {1, 1, 0, 1},
+            {1, 1, 1, 0}
+    };
 
     //The current best parsimony score (used for branch+bound and maintaining list of most parsimonious trees)
-    protected int parsimonyScore = -1;
+    protected double parsimonyScore = Double.POSITIVE_INFINITY;
 
     //The list of labelled nodes received from the input
-    protected List<Node<S>> labelledNodes = new ArrayList<>();
+    protected List<Node> labelledNodes = new ArrayList<>();
 
     //The set of all tree topologies
-    protected Set<Node<S>> trees = new HashSet<>();
+    protected Set<Node> trees = new HashSet<>();
 
     //The count of all trees enumerated (only maintained in the basic enumerate methods, not in fitch or hartigan)
     protected int treeCounter = 0;
 
     //The root of the current tree
-    protected Node<S> root = new Node<>("");
-
-    //the number of characters a species has (Node.chars, passed in to avoid overhead)
-    protected int chars = 0;
+    protected Node root = new Node("");
 
     //Add internal between current and parent, and then make leaf a child of internal
-    protected void addNodeToEdge(Node<S> current, Node<S> parent, Node<S> internal, Node<S> leaf) {
+    protected void addNodeToEdge(Node current, Node parent, Node internal, Node leaf) {
         Node.unlinkNodes(parent, current);
 
         Node.linkNodes(parent, internal);
@@ -41,7 +41,7 @@ public abstract class TreeEnumerator<S> {
     }
 
     //Remove internal and leaf, leaving just parent and current
-    protected void removeNodeFromEdge(Node<S> current, Node<S> parent, Node<S> internal, Node<S> leaf) {
+    protected void removeNodeFromEdge(Node current, Node parent, Node internal, Node leaf) {
         Node.unlinkNodes(internal, leaf);
         Node.unlinkNodes(internal, current);
         Node.unlinkNodes(parent, internal);
@@ -50,7 +50,7 @@ public abstract class TreeEnumerator<S> {
     }
 
     //Keep only the most parsimonious trees found so far
-    protected void updateMPlist(int thisParsimonyScore) {
+    protected void updateMPlist(double thisParsimonyScore) {
         if (thisParsimonyScore <= parsimonyScore) {
             if (thisParsimonyScore < parsimonyScore) {
                 //Clear the list if a new best parsimony score is found

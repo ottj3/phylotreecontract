@@ -1,4 +1,4 @@
-package edu.tcnj.phylotrees.data;
+package edu.tcnj.phylotrees.simpleweight.data;
 
 import com.koloboke.compile.ConcurrentModificationUnchecked;
 import com.koloboke.compile.KolobokeMap;

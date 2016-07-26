@@ -1,7 +1,6 @@
-package edu.tcnj.phylotrees;
+package edu.tcnj.phylotrees.mixedweight;
 
-import edu.tcnj.phylotrees.data.CharacterList;
-import edu.tcnj.phylotrees.data.Node;
+import edu.tcnj.phylotrees.mixedweight.data.Node;
 
 import java.util.*;
 
@@ -9,16 +8,13 @@ public class Parser {
 
     private static final String SPECIALS = "(),;";
 
-    public Parser() {
-    }
-
     /**
      * Converts a single node to a full node string, but does not recursively build a tree.
      *
      * @param node the {@link Node} to stringify
      * @return string of the Node's label and cost
      */
-    private <S> String nodeToString(Node<S> node) {
+    private static String nodeToString(Node node) {
         if (node == null) return "";
         return node.label;
     }
@@ -29,22 +25,22 @@ public class Parser {
      * @param root top-most node of tree to convert
      * @return Newick-format tree representation
      */
-    public <S> String toString(Node<S> root) {
+    public static String toString(Node root) {
         if (root == null) return ";";
         String string = nodeToString(root) + ";";
         return toStringRecursive(root) + string;
     }
 
-    private <S> String toStringRecursive(Node<S> root) {
+    private static String toStringRecursive(Node root) {
         String string = "";
 
         if (!root.children.isEmpty()) {
             string = ")" + string;
         }
 
-        ListIterator<Node<S>> it = root.children.listIterator(root.children.size());
+        ListIterator<Node> it = root.children.listIterator(root.children.size());
         while (it.hasPrevious()) {
-            Node<S> child = it.previous();
+            Node child = it.previous();
             string = nodeToString(child) + string;
             string = (it.hasPrevious() ? "," : "") + toStringRecursive(child) + string;
         }
@@ -62,7 +58,7 @@ public class Parser {
      * @param s Newick-formatted string
      * @return root {@link Node} of the tree
      */
-    public <S> Node<S> fromString(String s) {
+    public static Node fromString(String s) {
         if (s.isEmpty())
             throw new IllegalArgumentException("Empty string can't be a Newick tree, needs at least a ';'");
         if (s.length() == 1 && s.charAt(0) == ';') return null; // empty tree is technically a valid tree
@@ -72,7 +68,7 @@ public class Parser {
         return fromStringRecursive(s.substring(0, s.length() - 1), null);
     }
 
-    private <S> Node<S> fromStringRecursive(String s, Node<S> parent) {
+    private static Node fromStringRecursive(String s, Node parent) {
         int prevSpecial = -1;
         for (int i = s.length() - 1; i >= 0; i--) {
             // scan left until we find one of our special characters
@@ -85,7 +81,7 @@ public class Parser {
         }
         String label = s.substring(prevSpecial == -1 ? 0 : prevSpecial + 1, s.length());
 
-        Node<S> current = nodeFromLabel(label);
+        Node current = nodeFromLabel(label);
         if (parent != null) {
             current.parent = parent;
             parent.children.add(current);
@@ -142,12 +138,13 @@ public class Parser {
 
     }
 
-    protected <S> Node<S> nodeFromLabel(String label) {
-        Node<S> node = new Node<>("");
-        if (!label.isEmpty()) {
-            node.label = label;
-            node.labelled = true;
-        }
+    protected static Node nodeFromLabel(String label) {
+        return nodeFromLabel(label, 0.0D);
+    }
+
+    protected static Node nodeFromLabel(String label, double cost) {
+        Node node = new Node(label);
+        node.edgeCost = cost;
         return node;
     }
 
@@ -157,37 +154,22 @@ public class Parser {
      *
      * @param input    list of a string for each species in the form "L:XYZ" where L is the name and each
      *                 X, Y, and Z is the state of the character at the given position
-     * @param species  a list to be filled with nodes
-     * @param worldSet a {@link CharacterList} to be filled with all states for each character
      */
-    public <S> void speciesList(List<String> input, List<Node<S>> species, List<Set<S>> worldSet) {
-        List<String> labels = new ArrayList<>();
-        List<String> data = new ArrayList<>();
-        for (String s : input) {
-            String[] sp = s.split(":");
-            labels.add(sp[0]);
-            data.add(sp[1]);
-        }
-        removeAllUninformative(data);
-        for (int i = 0; i < input.size(); i++) {
-            Node<S> node = new Node<>(labels.get(i));
-            int chars = data.get(i).length();
-            node.root = Node.sets(chars);
-
-            char[] charArray = data.get(i).toCharArray();
-            for (int j = 0; j < charArray.length; j++) {
-                if (worldSet.size() <= j) {
-                    worldSet.add(new HashSet<S>());
-                }
-                S state = (S) Character.valueOf(charArray[j]);
-                worldSet.get(j).add(state);
-                node.root.get(j).add(state);
-            }
+    public static List<Node> speciesList(List<String> input) {
+        List<Node> species = new ArrayList<>();
+        for (String line : input) {
+            String[] sp = line.split(":");
+            String label = sp[0];
+            String data = sp[1];
+            Node.chars = data.length();
+            Node node = new Node(label);
+            node.setData(data);
             species.add(node);
         }
+        return species;
     }
 
-    private void removeAllUninformative(List<String> data) {
+    private static void removeAllUninformative(List<String> data) {
         if (data == null || data.isEmpty()) return;
 
         for (int i = data.get(0).length() - 1; i >= 0; i--) {
@@ -206,5 +188,28 @@ public class Parser {
                 }
             }
         }
+    }
+
+    /**
+     * Recursively sets data on all labelled nodes in a tree.
+     * @param root node at root of tree
+     * @param labelToSequence map of node labels to the dna sequence of that species
+     */
+    public static void fillNodes(Node root, Map<String, String> labelToSequence) {
+        for (Node child : root.children) {
+            fillNodes(child, labelToSequence);
+        }
+        if (root.labelled && labelToSequence.containsKey(root.label)) {
+            root.setData(labelToSequence.get(root.label));
+        }
+    }
+
+    public static void fillNodes(Node root, List<String> labelToSequence) {
+        Map<String, String> map = new HashMap<>();
+        for (String l : labelToSequence) {
+            String[] s = l.split(":");
+            map.put(s[0], s[1]);
+        }
+        fillNodes(root, map);
     }
 }

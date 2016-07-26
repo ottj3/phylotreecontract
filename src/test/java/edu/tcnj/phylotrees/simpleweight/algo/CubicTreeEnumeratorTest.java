@@ -1,7 +1,7 @@
-package edu.tcnj.phylotrees.algo;
+package edu.tcnj.phylotrees.simpleweight.algo;
 
-import edu.tcnj.phylotrees.Parser;
-import edu.tcnj.phylotrees.data.Node;
+import edu.tcnj.phylotrees.simpleweight.Parser;
+import edu.tcnj.phylotrees.simpleweight.data.Node;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

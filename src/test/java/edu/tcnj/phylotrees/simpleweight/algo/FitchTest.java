@@ -1,6 +1,6 @@
-package edu.tcnj.phylotrees.algo;
+package edu.tcnj.phylotrees.simpleweight.algo;
 
-import edu.tcnj.phylotrees.data.Node;
+import edu.tcnj.phylotrees.simpleweight.data.Node;
 import org.junit.Before;
 import org.junit.Test;
 

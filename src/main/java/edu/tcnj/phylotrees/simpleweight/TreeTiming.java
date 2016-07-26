@@ -1,10 +1,10 @@
-package edu.tcnj.phylotrees;
+package edu.tcnj.phylotrees.simpleweight;
 
-import edu.tcnj.phylotrees.algo.CubicTreeEnumerator;
-import edu.tcnj.phylotrees.algo.EdgeContractor;
-import edu.tcnj.phylotrees.algo.MixedTreeEnumerator;
-import edu.tcnj.phylotrees.data.CharacterList;
-import edu.tcnj.phylotrees.data.Node;
+import edu.tcnj.phylotrees.simpleweight.algo.CubicTreeEnumerator;
+import edu.tcnj.phylotrees.simpleweight.algo.EdgeContractor;
+import edu.tcnj.phylotrees.simpleweight.algo.MixedTreeEnumerator;
+import edu.tcnj.phylotrees.simpleweight.data.CharacterList;
+import edu.tcnj.phylotrees.simpleweight.data.Node;
 
 import java.util.*;
 import java.util.concurrent.*;

@@ -1,4 +1,4 @@
-package edu.tcnj.phylotrees.data;
+package edu.tcnj.phylotrees.simpleweight.data;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,8 +12,8 @@ import java.util.Set;
  * scale up a tree to find the true root of a tree.</p>
  * <p>A node may also store {@link CharacterList}s for {@link #root},
  * {@link #upper}, and {@link #lower} sets used during the calculation of
- * parsimony scores via {@link edu.tcnj.phylotrees.algo.Fitch}s or
- * {@link edu.tcnj.phylotrees.algo.Hartigan}'s algorithms.</p>
+ * parsimony scores via {@link edu.tcnj.phylotrees.simpleweight.algo.Fitch}s or
+ * {@link edu.tcnj.phylotrees.simpleweight.algo.Hartigan}'s algorithms.</p>
  */
 public class Node<S> implements Cloneable {
 

@@ -1,7 +1,7 @@
-package edu.tcnj.phylotrees.algo;
+package edu.tcnj.phylotrees.simpleweight.algo;
 
-import edu.tcnj.phylotrees.data.CharacterList;
-import edu.tcnj.phylotrees.data.Node;
+import edu.tcnj.phylotrees.simpleweight.data.CharacterList;
+import edu.tcnj.phylotrees.simpleweight.data.Node;
 
 import java.util.List;
 import java.util.Set;
