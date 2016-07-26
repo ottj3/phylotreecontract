@@ -74,7 +74,7 @@ public class PhyloTreeContract {
         );
         System.out.println("List of best trees (structure only): ");
         for (Node<Character> node : mostCompact) {
-            System.out.println(parser.toString(node, false));
+            System.out.println(parser.toString(node));
         }
     }
 

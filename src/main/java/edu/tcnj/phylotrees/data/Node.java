@@ -23,12 +23,6 @@ public class Node<S> implements Cloneable {
     public String label;
 
     /**
-     * The cost of the node. At the moment this is preserved by the parser for Newick
-     * Tree format strings, but is not used internally.
-     */
-    public int cost;
-
-    /**
      * Whether this node has a known label. Sometimes useful when running algorithms
      * on nodes that have root sets, but may not be known labelled nodes.
      */
@@ -65,17 +59,6 @@ public class Node<S> implements Cloneable {
     public Node(String label) {
         this.label = label;
         this.labelled = !label.isEmpty();
-    }
-
-    /**
-     * Construct a node with the given name and cost.
-     *
-     * @param label a name for the node, or an empty string for an unlabelled node
-     * @param cost  the cost of the node, generally representing the weight of the edge to its parent
-     */
-    public Node(String label, int cost) {
-        this(label);
-        this.cost = cost;
     }
 
     /**
@@ -125,7 +108,7 @@ public class Node<S> implements Cloneable {
      */
     @Override
     public Node<S> clone() {
-        Node<S> newNode = new Node<>(this.label, this.cost);
+        Node<S> newNode = new Node<>(this.label);
         for (Node<S> child : children) {
             Node<S> newChild = child.clone();
             newChild.parent = newNode;

@@ -84,7 +84,7 @@ public class Fitch {
 
         if (root.children.size() > 2) {
             throw new IllegalArgumentException("Can only perform Fitch on cubic tree - got node of degree > 3: "
-                    + (new Parser()).toString(root, false));
+                    + (new Parser()).toString(root));
         }
 
         score += fitch(root, chars);
