@@ -12,19 +12,35 @@ public class MixedWeightPhyloTrees {
 
     public static void main(String[] args) {
         try {
-            (new MixedWeightPhyloTrees()).enumerateCubicFromInput();
-            (new MixedWeightPhyloTrees()).getTimingInfoFromInput();
+            Scanner sc = new Scanner(System.in);
+            while (true) {
+                System.out.println("What would you like to do?");
+                System.out.println("1. Find the best tree from a set of input species.");
+                System.out.println("2. Compact existing MP trees to their most compact form.");
+                System.out.println("3. Enumerate mixed-labelled/multifurcating trees AND cubic trees, and compare times.");
+                String ln = sc.nextLine();
+                if (ln.matches("1.*")) {
+                    (new MixedWeightPhyloTrees()).enumerateCubicFromInput();
+                    break;
+                } else if (ln.matches("2.*")) {
+                    (new MixedWeightPhyloTrees()).onlyContractCubics();
+                    break;
+                } else if (ln.matches("3.*")) {
+                    (new MixedWeightPhyloTrees()).getTimingInfoFromInput();
+                    break;
+                }
+            }
         } catch (IOException e) {
             System.out.println("There was an error reading the input file.");
             e.printStackTrace();
         }
     }
 
-    private Parser parser = new Parser();
+//    private Parser parser = new Parser();
 
     private void enumerateCubicFromInput() throws IOException {
         List<String> rawSpecies = readSpecies();
-        List<Node> species = parser.speciesList(rawSpecies);
+        List<Node> species = Parser.speciesList(rawSpecies);
         double[][] weights = readWeights();
         System.out.println("Now enumerating cubic trees and contracting them to find"
                 + " the most parsimonious, most compact mixed-labelled tree. Note that"
@@ -35,8 +51,8 @@ public class MixedWeightPhyloTrees {
     }
 
     private List<String> readSpecies() throws IOException {
-        System.out.println("Reading species input from file \"input.txt\".");
-        File file = new File("input.txt");
+        System.out.println("Reading species input from file \"species.txt\".");
+        File file = new File("species.txt");
 
         FileInputStream fis = new FileInputStream(file);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
@@ -66,11 +82,12 @@ public class MixedWeightPhyloTrees {
                 weights[i][j] = Double.valueOf(split[j]);
             }
         }
+        br.close();
         return weights;
     }
 
     private void runCubic(List<Node> species, double[][] weights) {
-        int chars = species.iterator().next().data.size();
+        int chars = species.get(0).data.size();
         long before = System.currentTimeMillis();
         CubicTreeEnumerator treeEnumerator = new CubicTreeEnumerator(species, weights, chars);
         Set<Node> mostParsimonious = treeEnumerator.sankoffEnumerate();
@@ -89,8 +106,29 @@ public class MixedWeightPhyloTrees {
         );
         System.out.println("List of best trees (structure only): ");
         for (Node node : mostCompact) {
-            System.out.println(parser.toString(node));
+            System.out.println(Parser.toString(node));
         }
+    }
+
+
+    private void onlyContractCubics() throws IOException {
+        System.out.println("Reading tree input from file \"trees.txt\".");
+        File file = new File("trees.txt");
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        String line;
+        Set<Node> inTrees = new HashSet<>();
+        while ((line = br.readLine()) != null) {
+            inTrees.add(Parser.fromString(line));
+        }
+        br.close();
+        List<String> rawSpecies = readSpecies();
+        List<Node> species = Parser.speciesList(rawSpecies);
+        for (Node inTree : inTrees) {
+            Parser.fillNodes(inTree, rawSpecies);
+        }
+
+        compactCubic(inTrees, readWeights(), species.get(0).data.size());
     }
 
     private List<Node> compactCubic(Set<Node> mostParsimonious,

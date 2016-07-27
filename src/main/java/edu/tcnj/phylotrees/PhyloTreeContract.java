@@ -9,12 +9,12 @@ public class PhyloTreeContract {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         do {
-            System.out.println("Use simple weights or mixed weights?");
+            System.out.println("Use Simple weights or Mixed weights?");
             String ln = sc.nextLine();
-            if (ln.matches("s(imple)?.*")) {
+            if (ln.matches("(s|S)(imple)?.*")) {
                 SimpleWeightPhyloTrees.main(args);
                 break;
-            } else if (ln.matches("m(ixed)?.*")) {
+            } else if (ln.matches("(m|M)(ixed)?.*")) {
                 MixedWeightPhyloTrees.main(args);
                 break;
             }

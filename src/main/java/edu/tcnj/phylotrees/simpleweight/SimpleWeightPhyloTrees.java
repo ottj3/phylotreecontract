@@ -12,8 +12,24 @@ public class SimpleWeightPhyloTrees {
 
     public static void main(String[] args) {
         try {
-            (new SimpleWeightPhyloTrees()).enumerateCubicFromInput();
-            (new SimpleWeightPhyloTrees()).getTimingInfoFromInput();
+            Scanner sc = new Scanner(System.in);
+            while (true) {
+                System.out.println("What would you like to do?");
+                System.out.println("1. Find the best tree from a set of input species.");
+                System.out.println("2. Compact existing MP trees to their most compact form.");
+                System.out.println("3. Enumerate mixed-labelled/multifurcating trees AND cubic trees, and compare times.");
+                String ln = sc.nextLine();
+                if (ln.matches("1.*")) {
+                    (new SimpleWeightPhyloTrees()).enumerateCubicFromInput();
+                    break;
+                } else if (ln.matches("2.*")) {
+                    (new SimpleWeightPhyloTrees()).onlyContractCubics();
+                    break;
+                } else if (ln.matches("3.*")) {
+                    (new SimpleWeightPhyloTrees()).getTimingInfoFromInput();
+                    break;
+                }
+            }
         } catch (IOException e) {
             System.out.println("There was an error reading the input file.");
             e.printStackTrace();
@@ -38,8 +54,8 @@ public class SimpleWeightPhyloTrees {
     }
 
     private List<String> readSpecies() throws IOException {
-        System.out.println("Reading species input from file \"input.txt\".");
-        File file = new File("input.txt");
+        System.out.println("Reading species input from file \"species.txt\".");
+        File file = new File("species.txt");
 
         FileInputStream fis = new FileInputStream(file);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
@@ -48,12 +64,13 @@ public class SimpleWeightPhyloTrees {
         while ((line = br.readLine()) != null) {
             rawSpecies.add(line);
         }
+        br.close();
         System.out.println("Read " + rawSpecies.size() + " species from file.");
         return rawSpecies;
     }
 
     private void runCubic(List<Node<Character>> species, CharacterList<Character> worldSet) {
-        int chars = species.iterator().next().root.size();
+        int chars = species.get(0).root.size();
         long before = System.currentTimeMillis();
         CubicTreeEnumerator<Character> treeEnumerator = new CubicTreeEnumerator<>(species, chars);
         Set<Node<Character>> mostParsimonious = treeEnumerator.fitchEnumerate();
@@ -74,6 +91,25 @@ public class SimpleWeightPhyloTrees {
         for (Node<Character> node : mostCompact) {
             System.out.println(parser.toString(node));
         }
+    }
+
+    private void onlyContractCubics() throws IOException {
+        System.out.println("Reading tree input from file \"trees.txt\".");
+        File file = new File("trees.txt");
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        String line;
+        Set<Node<Character>> inTrees = new HashSet<>();
+        while ((line = br.readLine()) != null) {
+            inTrees.add(parser.<Character>fromString(line));
+        }
+        List<String> rawSpecies = readSpecies();
+        List<Node<Character>> species = new ArrayList<>();
+        List<Set<Character>> worldSet0 = new ArrayList<>();
+        parser.speciesList(rawSpecies, species, worldSet0);
+        CharacterList<Character> worldSet = new CharacterList<>(worldSet0);
+
+        compactCubic(inTrees, worldSet, species.get(0).root.size());
     }
 
     private List<Node<Character>> compactCubic(Set<Node<Character>> mostParsimonious,

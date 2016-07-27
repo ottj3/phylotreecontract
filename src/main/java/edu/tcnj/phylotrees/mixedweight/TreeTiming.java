@@ -12,7 +12,7 @@ import java.util.concurrent.*;
 public class TreeTiming {
     private static Parser parser = new Parser();
 
-    public static void runTiming(List<String> testData, double[][] weights, int numTrials, int minTreeSize, int maxTreeSize, boolean multithreaded) {
+    public static void runTiming(List<String> testData, final double[][] weights, int numTrials, int minTreeSize, int maxTreeSize, boolean multithreaded) {
         ExecutorService executorService = (multithreaded) ?
                 Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
                 : Executors.newSingleThreadExecutor();
