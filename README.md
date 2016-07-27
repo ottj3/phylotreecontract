@@ -8,6 +8,8 @@ To build, run ```./gradlew build``` for *nix, or ```gradlew.bat build``` for Win
 
 The completed java program will be in ```build/libs/phylotreecontract.jar``` and can be run with ```java -jar phylotreecontract.jar```.
 
+You can also find a prebuilt jar in the ```example``` folder, along with a sample _species.txt_.
+
 ### Usage
 
 Upon starting the program, you should be presented with a series of prompts.
