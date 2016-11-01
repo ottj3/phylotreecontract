@@ -1,4 +1,14 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 repositories {
     mavenCentral()
@@ -14,3 +24,9 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 jar.manifest.attributes 'Main-Class': 'edu.tcnj.phylotrees.PhyloTreeContract'
+
+shadowJar {
+    dependencies {
+        exclude(dependency('com.koloboke:koloboke-compile:0.5.1'))
+    }
+}
