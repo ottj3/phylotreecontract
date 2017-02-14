@@ -94,6 +94,12 @@ public class SimpleWeightPhyloTrees {
     }
 
     private void onlyContractCubics() throws IOException {
+        List<String> rawSpecies = readSpecies();
+        List<Node<Character>> species = new ArrayList<>();
+        List<Set<Character>> worldSet0 = new ArrayList<>();
+        parser.speciesList(rawSpecies, species, worldSet0);
+        CharacterList<Character> worldSet = new CharacterList<>(worldSet0);
+
         System.out.println("Reading tree input from file \"trees.txt\".");
         File file = new File("trees.txt");
 
@@ -101,15 +107,16 @@ public class SimpleWeightPhyloTrees {
         String line;
         Set<Node<Character>> inTrees = new HashSet<>();
         while ((line = br.readLine()) != null) {
-            inTrees.add(parser.<Character>fromString(line));
+            inTrees.add(parser.fromString(line, species));
         }
-        List<String> rawSpecies = readSpecies();
-        List<Node<Character>> species = new ArrayList<>();
-        List<Set<Character>> worldSet0 = new ArrayList<>();
-        parser.speciesList(rawSpecies, species, worldSet0);
-        CharacterList<Character> worldSet = new CharacterList<>(worldSet0);
 
-        compactCubic(inTrees, worldSet, species.get(0).root.size());
+        System.out.println("Contracting " + inTrees.size() + " cubic tree" + (inTrees.size() == 1 ? "." : "s."));
+        List<Node<Character>> compactCubic = compactCubic(inTrees, worldSet, species.get(0).root.size());
+
+        System.out.println("List of contracted trees (structure only): ");
+        for (Node<Character> node : compactCubic) {
+            System.out.println(parser.toString(node));
+        }
     }
 
     private List<Node<Character>> compactCubic(Set<Node<Character>> mostParsimonious,

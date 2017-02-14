@@ -3,7 +3,12 @@ package edu.tcnj.phylotrees.simpleweight;
 import edu.tcnj.phylotrees.simpleweight.data.CharacterList;
 import edu.tcnj.phylotrees.simpleweight.data.Node;
 
-import java.util.*;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
 public class Parser {
 
@@ -62,17 +67,17 @@ public class Parser {
      * @param s Newick-formatted string
      * @return root {@link Node} of the tree
      */
-    public <S> Node<S> fromString(String s) {
+    public <S> Node<S> fromString(String s, @Nullable List<Node<S>> species) {
         if (s.isEmpty())
             throw new IllegalArgumentException("Empty string can't be a Newick tree, needs at least a ';'");
         if (s.length() == 1 && s.charAt(0) == ';') return null; // empty tree is technically a valid tree
         if (s.charAt(s.length() - 1) != ';') {
             throw new IllegalArgumentException("Invalid Newick string, missing ';'");
         }
-        return fromStringRecursive(s.substring(0, s.length() - 1), null);
+        return fromStringRecursive(s.substring(0, s.length() - 1), null, species);
     }
 
-    private <S> Node<S> fromStringRecursive(String s, Node<S> parent) {
+    private <S> Node<S> fromStringRecursive(String s, Node<S> parent, @Nullable List<Node<S>> species) {
         int prevSpecial = -1;
         for (int i = s.length() - 1; i >= 0; i--) {
             // scan left until we find one of our special characters
@@ -85,7 +90,7 @@ public class Parser {
         }
         String label = s.substring(prevSpecial == -1 ? 0 : prevSpecial + 1, s.length());
 
-        Node<S> current = nodeFromLabel(label);
+        Node<S> current = nodeFromLabel(label, species);
         if (parent != null) {
             current.parent = parent;
             parent.children.add(current);
@@ -126,23 +131,30 @@ public class Parser {
             }
         }
         if (childSeps.isEmpty()) {
-            fromStringRecursive(sC, current); // single child
+            fromStringRecursive(sC, current, species); // single child
         } else {
             int start = 0;
             int next = 0;
             for (int i : childSeps) {
                 next = i;
-                fromStringRecursive(sC.substring(start, next), current); // children up to the last ','
+                fromStringRecursive(sC.substring(start, next), current, species); // children up to the last ','
                 start = next;
             }
-            fromStringRecursive(sC.substring(next + 1, sC.length()), current); // child from last ',' to the ')'
+            fromStringRecursive(sC.substring(next + 1, sC.length()), current, species); // child from last ',' to the ')'
         }
 
         return current;
 
     }
 
-    protected <S> Node<S> nodeFromLabel(String label) {
+    protected <S> Node<S> nodeFromLabel(String label, List<Node<S>> species) {
+        if (species != null) {
+            for (Node<S> specy : species) {
+                if (specy.label.equals(label)) {
+                    return specy.clone();
+                }
+            }
+        }
         Node<S> node = new Node<>("");
         if (!label.isEmpty()) {
             node.label = label;
