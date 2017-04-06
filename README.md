@@ -22,9 +22,11 @@ The second prompt will ask you what you want to do. There are three options.
 1. Find the best tree from a set of input species.
 
   This option will read in a list of species, enumerate (exhaustively, but branch-and-bounding bad trees) the most parsimonious cubic trees, then compact them into mixed-labelled, multifurcating trees as applicable. For large sizes of input, this can be slow and option 2 might be better.
+
 2. Compact existing MP trees to their most compact form.
 
   This option will read in a list of species as above, but instead of enumerating cubic trees, it will also read in a list of trees to compact. For medium input sizes, programs (such as PAUP* or phylip) which are much more optimized can generally enumerate cubic trees much faster than this program (in the aformentioned programs, via BandB and dnapenny, respectively). For even larger input sizes, heuristic searches (HSearch/dnapars, respectively) may be more effective to find (approximate) MP cubic trees.
+
 3. Enumerate mixed-labelled/multifurcating trees AND cubic trees, and compare times.
 
   This option will read in a list of species as in option 1, but in addition will also enumerate mixed-labelled, multifurcating trees instead of just the cubic trees. This is just to be used as a comparison  and correctness check of the algorithms, and will be very slow for larger data sets (generally starting around 9-10 species).
